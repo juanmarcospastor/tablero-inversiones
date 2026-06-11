@@ -1,0 +1,18 @@
+<section class="summary-grid">
+    <div class="summary-card">
+        <span>Valor actual cartera</span>
+        <strong>{{ resumen.valor_total | money }}</strong>
+    </div>
+    <div class="summary-card">
+        <span>Capital invertido</span>
+        <strong>{{ resumen.invertido_total | money }}</strong>
+    </div>
+    <div class="summary-card {% if resumen.resultado_total >= 0 %}positivo{% else %}negativo{% endif %}">
+        <span>Resultado total</span>
+        <strong>{{ resumen.resultado_total | money }}</strong>
+    </div>
+    <div class="summary-card {% if resumen.rentabilidad_total >= 0 %}positivo{% else %}negativo{% endif %}">
+        <span>Rentabilidad total</span>
+        <strong>{{ resumen.rentabilidad_total | pct }}</strong>
+    </div>
+</section>

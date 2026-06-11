@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Dashboard de Inversiones{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1>Tablero de Inversiones</h1>
+        <p>Seguimiento de tu cartera actual.</p>
+    </div>
+    <div class="header-pill">{{ resumen.cantidad_activos }} {% if resumen.cantidad_activos == 1 %}activo{% else %}activos{% endif %}</div>
+</header>
+
+{% include "cards/card_resumen.html" %}
+
+<section class="charts-grid">
+    <div class="panel">
+        <h2>Evolucion del valor de cartera</h2>
+        <div class="chart-box"><canvas id="chartEvolucion"></canvas></div>
+    </div>
+    <div class="panel">
+        <h2>Composicion por tipo de activo</h2>
+        <div class="chart-box small"><canvas id="chartComposicion"></canvas></div>
+    </div>
+</section>
+
+<section>
+    <h2>Inversion actual</h2>
+    <div class="asset-grid">
+        {% for activo in cartera %}
+            {% include "cards/card_activo.html" %}
+        {% endfor %}
+    </div>
+</section>
+
+<section class="panel table-panel">
+    <h2>Detalle de cartera</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Activo</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Precio prom.</th>
+                <th>Precio actual</th>
+                <th>Valor actual</th>
+                <th>Resultado</th>
+                <th>Rent.</th>
+                <th>Fecha precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activo in cartera %}
+            <tr>
+                <td><a href="{{ url_for('activo', ticker=activo.ticker) }}">{{ activo.ticker }}</a></td>
+                <td>{{ activo.tipo_activo }}</td>
+                <td>{{ "{:,.2f}".format(activo.cantidad_actual).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
+                <td>{{ activo.precio_promedio | money }}</td>
+                <td>{{ activo.precio_actual | money }}</td>
+                <td>{{ activo.valor_actual | money }}</td>
+                <td class="{% if activo.resultado_pesos >= 0 %}up{% else %}down{% endif %}">{{ activo.resultado_pesos | money }}</td>
+                <td>{{ activo.rentabilidad_total | pct }}</td>
+                <td>{{ activo.fecha_precio }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const evolucion = {{ evolucion | tojson }};
+const composicion = {{ composicion | tojson }};
+
+new Chart(document.getElementById('chartEvolucion'), {
+    type: 'line',
+    data: {
+        labels: evolucion.map(x => x.fecha),
+        datasets: [{
+            label: 'Valor cartera',
+            data: evolucion.map(x => x.valor),
+            tension: 0.25,
+            fill: false
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { ticks: { callback: value => '$ ' + value.toLocaleString('es-AR') } } }
+    }
+});
+
+new Chart(document.getElementById('chartComposicion'), {
+    type: 'doughnut',
+    data: {
+        labels: composicion.map(x => x.tipo_activo),
+        datasets: [{
+            label: 'Valor',
+            data: composicion.map(x => x.valor)
+        }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+});
+</script>
+{% endblock %}

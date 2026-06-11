@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Detalle {{ ticker }}{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <div>
+        <h1>Detalle de {{ ticker }}</h1>
+        <p>Histórico de precios y posición actual.</p>
+    </div>
+    <a class="btn" href="{{ url_for('index') }}">Volver</a>
+</header>
+
+{% if activo %}
+<section class="summary-grid">
+    <div class="summary-card"><span>Valor actual</span><strong>{{ activo.valor_actual | money }}</strong></div>
+    <div class="summary-card"><span>Cantidad</span><strong>{{ "{:,.2f}".format(activo.cantidad_actual).replace(",", "X").replace(".", ",").replace("X", ".") }}</strong></div>
+    <div class="summary-card"><span>Precio actual</span><strong>{{ activo.precio_actual | money }}</strong></div>
+    <div class="summary-card"><span>Rentabilidad total</span><strong>{{ activo.rentabilidad_total | pct }}</strong></div>
+</section>
+
+<div class="panel">
+    <h2>Precio histórico</h2>
+    <div class="chart-box"><canvas id="chartPrecio"></canvas></div>
+</div>
+{% else %}
+<p>No se encontró el activo.</p>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if activo %}
+<script>
+const historial = {{ historial | tojson }};
+new Chart(document.getElementById('chartPrecio'), {
+    type: 'line',
+    data: {
+        labels: historial.map(x => x.fecha),
+        datasets: [{
+            label: '{{ ticker }}',
+            data: historial.map(x => x.precio),
+            tension: 0.25,
+            fill: false
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { ticks: { callback: value => '$ ' + value.toLocaleString('es-AR') } } }
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,79 @@
+<div class="asset-card">
+    <div class="asset-head">
+        <div>
+            <h3><a href="{{ url_for('activo', ticker=activo.ticker) }}">{{ activo.ticker }}</a></h3>
+            <p>{{ activo.nombre }}</p>
+        </div>
+        <span class="badge">{{ activo.tipo_activo }}</span>
+    </div>
+
+    <div class="asset-metrics">
+        <div>
+            <span>Cantidad</span>
+            <strong>{{ "{:,.2f}".format(activo.cantidad_actual).replace(",", "X").replace(".", ",").replace("X", ".") }}</strong>
+        </div>
+        <div>
+            <span>Precio actual</span>
+            <strong>{{ activo.precio_actual | money }}</strong>
+        </div>
+        <div>
+            <span>Valor actual</span>
+            <strong>{{ activo.valor_actual | money }}</strong>
+        </div>
+        <div>
+            <span>Resultado</span>
+            <strong class="{% if activo.resultado_pesos >= 0 %}up{% else %}down{% endif %}">{{ activo.resultado_pesos | money }}</strong>
+        </div>
+    </div>
+
+    <div class="returns">
+        <span>Total: <b class="{% if activo.rentabilidad_total >= 0 %}up{% else %}down{% endif %}">{{ activo.rentabilidad_total | pct }}</b></span>
+        <span>1D: <b>{{ activo.rent_1d | pct }}</b></span>
+        <span>7D: <b>{{ activo.rent_7d | pct }}</b></span>
+        <span>30D: <b>{{ activo.rent_30d | pct }}</b></span>
+    </div>
+
+    {% if activo.ticker == "BTC" %}
+    <div class="btc-realtime" data-bitcoin-chart>
+        <div class="btc-chart-head">
+            <div>
+                <span>Bitcoin realtime</span>
+                <strong data-btc-price>Consultando...</strong>
+            </div>
+            <small data-btc-updated></small>
+        </div>
+        <div class="btc-range-controls" aria-label="Rango del grafico de Bitcoin">
+            <button type="button" data-btc-range="1" class="active">1D</button>
+            <button type="button" data-btc-range="30">1M</button>
+            <button type="button" data-btc-range="365">1A</button>
+            <button type="button" data-btc-range="max">Todo</button>
+        </div>
+        <div class="btc-chart-box">
+            <canvas id="btcRealtimeChart"></canvas>
+        </div>
+        <p class="btc-status" data-btc-status>Datos de CoinGecko en ARS.</p>
+    </div>
+    {% endif %}
+
+    {% if activo.ticker == "NVDA" %}
+    <div class="btc-realtime" data-stock-chart>
+        <div class="btc-chart-head">
+            <div>
+                <span>NVIDIA realtime</span>
+                <strong data-stock-price>Consultando...</strong>
+            </div>
+            <small data-stock-updated></small>
+        </div>
+        <div class="btc-range-controls" aria-label="Rango del grafico de NVIDIA">
+            <button type="button" data-stock-range="1" class="active">1D</button>
+            <button type="button" data-stock-range="30">1M</button>
+            <button type="button" data-stock-range="365">1A</button>
+            <button type="button" data-stock-range="max">Todo</button>
+        </div>
+        <div class="btc-chart-box">
+            <canvas id="nvdaRealtimeChart"></canvas>
+        </div>
+        <p class="btc-status" data-stock-status>Datos de Yahoo Finance convertidos a ARS.</p>
+    </div>
+    {% endif %}
+</div>

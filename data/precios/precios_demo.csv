@@ -1,0 +1,19 @@
+fecha,ticker,precio,moneda,fuente
+2025-01-15,BTC,100000000,ARS,Bitcoin
+2026-05-01,BTC,118000000,ARS,Bitcoin
+2026-05-08,BTC,122500000,ARS,Bitcoin
+2026-05-15,BTC,126000000,ARS,Bitcoin
+2026-05-22,BTC,124000000,ARS,Bitcoin
+2026-05-29,BTC,129500000,ARS,Bitcoin
+2026-06-05,BTC,132000000,ARS,Bitcoin
+2026-06-10,BTC,135000000,ARS,Bitcoin
+2025-01-15,NVDA,141705.89,ARS,Yahoo Finance estimado
+2026-06-01,NVDA,320215.57,ARS,Yahoo Finance estimado
+2026-06-02,NVDA,317903.41,ARS,Yahoo Finance estimado
+2026-06-03,NVDA,309024.04,ARS,Yahoo Finance estimado
+2026-06-04,NVDA,314209.25,ARS,Yahoo Finance estimado
+2026-06-05,NVDA,294723.85,ARS,Yahoo Finance estimado
+2026-06-08,NVDA,301795.54,ARS,Yahoo Finance estimado
+2026-06-09,NVDA,300205.82,ARS,Yahoo Finance estimado
+2026-06-10,NVDA,287252.08,ARS,Yahoo Finance estimado
+2026-06-11,NVDA,293373.83,ARS,Yahoo Finance estimado
