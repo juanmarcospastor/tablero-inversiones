@@ -16,6 +16,7 @@ app = Flask(__name__)
 
 CEDEAR_SYMBOLS = {
     "AAPL": "AAPL.BA",
+    "ARKK": "ARKK.BA",
     "IBB": "IBB.BA",
     "NVDA": "NVDA.BA",
 }

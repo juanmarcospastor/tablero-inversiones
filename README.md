@@ -6,6 +6,7 @@ Actualmente incluye:
 
 - Bitcoin (`BTC`)
 - Apple CEDEAR (`AAPL`, cotizacion Yahoo Finance `AAPL.BA`)
+- ETF Innovacion ARK (`ARKK`, cotizacion Yahoo Finance `ARKK.BA`)
 - ETF Biotecnologia IBB (`IBB`, cotizacion Yahoo Finance `IBB.BA`)
 - NVIDIA CEDEAR (`NVDA`, cotizacion Yahoo Finance `NVDA.BA`)
 - Resumen general de cartera
@@ -14,7 +15,7 @@ Actualmente incluye:
 - Grafico de evolucion de cartera
 - Grafico de composicion por tipo de activo
 - Grafico realtime de Bitcoin via CoinGecko
-- Graficos realtime de CEDEARs via Yahoo Finance (`AAPL.BA`, `IBB.BA`, `NVDA.BA`)
+- Graficos realtime de CEDEARs via Yahoo Finance (`AAPL.BA`, `ARKK.BA`, `IBB.BA`, `NVDA.BA`)
 
 ## Ejecutar localmente
 
