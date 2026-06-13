@@ -10,7 +10,7 @@
     <div class="asset-metrics">
         <div>
             <span>Cantidad</span>
-            <strong>{{ "{:,.2f}".format(activo.cantidad_actual).replace(",", "X").replace(".", ",").replace("X", ".") }}</strong>
+            <strong>{{ activo.cantidad_actual | qty }}</strong>
         </div>
         <div>
             <span>Precio actual</span>

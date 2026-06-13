@@ -13,7 +13,7 @@
 {% if activo %}
 <section class="summary-grid">
     <div class="summary-card"><span>Valor actual</span><strong>{{ activo.valor_actual | money }}</strong></div>
-    <div class="summary-card"><span>Cantidad</span><strong>{{ "{:,.2f}".format(activo.cantidad_actual).replace(",", "X").replace(".", ",").replace("X", ".") }}</strong></div>
+    <div class="summary-card"><span>Cantidad</span><strong>{{ activo.cantidad_actual | qty }}</strong></div>
     <div class="summary-card"><span>Precio actual</span><strong>{{ activo.precio_actual | money }}</strong></div>
     <div class="summary-card"><span>Rentabilidad total</span><strong>{{ activo.rentabilidad_total | pct }}</strong></div>
 </section>

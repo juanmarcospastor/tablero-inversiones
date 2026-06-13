@@ -1,5 +1,5 @@
 fecha_operacion,ticker,nombre,tipo_activo,operacion,cantidad,precio_unitario,monto_total,moneda,comisiones,fuente
-2025-01-15,BTC,Bitcoin,Cripto,COMPRA,0.006,100000000,600000,ARS,0,Bitcoin
+2025-01-22,BTC,Bitcoin,Cripto,COMPRA,0.00552715,108555000,600000,ARS,0,Compra real
 2025-01-22,NVDA,NVIDIA CEDEAR,CEDEAR,COMPRA,13,7377.84,95911.92,ARS,0,Compra real
 2025-01-22,AAPL,Apple CEDEAR,CEDEAR,COMPRA,8,13384.79,107078.32,ARS,0,Compra real
 2025-01-22,IBB,ETF Biotecnologia IBB,CEDEAR,COMPRA,17,6094.88,103612.96,ARS,0,Compra real

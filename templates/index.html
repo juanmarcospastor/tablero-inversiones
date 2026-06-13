@@ -53,7 +53,7 @@
             <tr>
                 <td><a href="{{ url_for('activo', ticker=activo.ticker) }}">{{ activo.ticker }}</a></td>
                 <td>{{ activo.tipo_activo }}</td>
-                <td>{{ "{:,.2f}".format(activo.cantidad_actual).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
+                <td>{{ activo.cantidad_actual | qty }}</td>
                 <td>{{ activo.precio_promedio | money }}</td>
                 <td>{{ activo.precio_actual | money }}</td>
                 <td>{{ activo.valor_actual | money }}</td>

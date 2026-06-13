@@ -21,7 +21,7 @@ CEDEAR_SYMBOLS = {
     "NVDA": "NVDA.BA",
 }
 
-HIDDEN_TICKERS = {"BTC"}
+HIDDEN_TICKERS = set()
 
 
 def _epoch(date_value):
@@ -91,12 +91,45 @@ def _latest_cedear_prices(tickers):
     return latest_prices
 
 
+def _latest_bitcoin_price():
+    url = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=ars&days=1&precision=2"
+    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(request, timeout=20) as response:
+        payload = json.loads(response.read().decode("utf-8"))
+
+    prices = payload.get("prices", [])
+    if not prices:
+        return None
+
+    timestamp_ms, price = prices[-1]
+    date = datetime.fromtimestamp(timestamp_ms / 1000, tz=timezone.utc)
+    return {
+        "fecha": date.strftime("%Y-%m-%d"),
+        "precio": round(float(price), 2),
+    }
+
+
+def _latest_market_prices(tickers):
+    tickers = set(tickers)
+    latest_prices = _latest_cedear_prices(tickers)
+
+    if "BTC" in tickers:
+        try:
+            btc_price = _latest_bitcoin_price()
+        except Exception:
+            btc_price = None
+        if btc_price is not None:
+            latest_prices["BTC"] = btc_price
+
+    return latest_prices
+
+
 def _aplicar_precios_actuales(cartera):
     if cartera.empty:
         return cartera
 
     cartera = cartera.copy()
-    latest_prices = _latest_cedear_prices(cartera["ticker"].tolist())
+    latest_prices = _latest_market_prices(cartera["ticker"].tolist())
     if not latest_prices:
         return cartera
 
@@ -209,6 +242,19 @@ def money(value):
 def pct(value):
     try:
         return "{:,.2f}%".format(float(value)).replace(",", "X").replace(".", ",").replace("X", ".")
+    except Exception:
+        return "-"
+
+
+@app.template_filter("qty")
+def qty(value):
+    try:
+        number = float(value)
+        decimals = 8 if abs(number) < 1 else 2
+        formatted = f"{number:,.{decimals}f}"
+        if abs(number) < 1:
+            formatted = formatted.rstrip("0").rstrip(".")
+        return formatted.replace(",", "X").replace(".", ",").replace("X", ".")
     except Exception:
         return "-"
 
