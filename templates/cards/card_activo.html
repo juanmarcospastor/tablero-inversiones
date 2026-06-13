@@ -55,25 +55,25 @@
     </div>
     {% endif %}
 
-    {% if activo.ticker == "NVDA" %}
-    <div class="btc-realtime" data-stock-chart>
+    {% if activo.ticker in ["AAPL", "NVDA"] %}
+    <div class="btc-realtime" data-stock-chart data-stock-ticker="{{ activo.ticker }}" data-stock-name="{{ activo.nombre }}">
         <div class="btc-chart-head">
             <div>
-                <span>NVIDIA CEDEAR realtime</span>
+                <span>{{ activo.nombre }} realtime</span>
                 <strong data-stock-price>Consultando...</strong>
             </div>
             <small data-stock-updated></small>
         </div>
-        <div class="btc-range-controls" aria-label="Rango del grafico de NVIDIA">
+        <div class="btc-range-controls" aria-label="Rango del grafico de {{ activo.nombre }}">
             <button type="button" data-stock-range="1" class="active">1D</button>
             <button type="button" data-stock-range="30">1M</button>
             <button type="button" data-stock-range="365">1A</button>
             <button type="button" data-stock-range="max">Todo</button>
         </div>
         <div class="btc-chart-box">
-            <canvas id="nvdaRealtimeChart"></canvas>
+            <canvas id="stockRealtimeChart-{{ activo.ticker }}"></canvas>
         </div>
-        <p class="btc-status" data-stock-status>Datos de Yahoo Finance para NVDA.BA.</p>
+        <p class="btc-status" data-stock-status>Datos de Yahoo Finance para {{ activo.ticker }}.BA.</p>
     </div>
     {% endif %}
 </div>

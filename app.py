@@ -14,6 +14,11 @@ from services.cartera import (
 
 app = Flask(__name__)
 
+CEDEAR_SYMBOLS = {
+    "AAPL": "AAPL.BA",
+    "NVDA": "NVDA.BA",
+}
+
 
 def _epoch(date_value):
     return int(date_value.replace(tzinfo=timezone.utc).timestamp())
@@ -92,29 +97,39 @@ def activo(ticker):
     return render_template("activo_detalle.html", activo=activo_data, historial=historial, ticker=ticker.upper())
 
 
-@app.route("/api/nvda/chart")
-def nvda_chart():
+@app.route("/api/cedear/<ticker>/chart")
+def cedear_chart(ticker):
+    ticker = ticker.upper()
+    yahoo_symbol = CEDEAR_SYMBOLS.get(ticker)
+    if yahoo_symbol is None:
+        return jsonify({"error": f"No hay simbolo CEDEAR configurado para {ticker}"}), 404
+
     range_value = request.args.get("range", "30")
     if range_value not in {"1", "30", "365", "max"}:
         range_value = "30"
 
     try:
         start, end, interval = _range_to_dates(range_value)
-        nvda_points = _fetch_yahoo_chart("NVDA.BA", start, end, interval)
-        if not nvda_points:
-            return jsonify({"error": "Yahoo Finance no devolvio precios de NVDA.BA"}), 502
+        cedear_points = _fetch_yahoo_chart(yahoo_symbol, start, end, interval)
+        if not cedear_points:
+            return jsonify({"error": f"Yahoo Finance no devolvio precios de {yahoo_symbol}"}), 502
 
         prices = [
             [int(point["date"].timestamp() * 1000), round(point["price"], 2)]
-            for point in nvda_points
+            for point in cedear_points
         ]
 
         if not prices:
-            return jsonify({"error": "No se pudo obtener NVDA.BA en ARS"}), 502
+            return jsonify({"error": f"No se pudo obtener {yahoo_symbol} en ARS"}), 502
 
-        return jsonify({"ticker": "NVDA.BA", "currency": "ARS", "prices": prices})
+        return jsonify({"ticker": yahoo_symbol, "currency": "ARS", "prices": prices})
     except Exception as exc:
         return jsonify({"error": str(exc)}), 502
+
+
+@app.route("/api/nvda/chart")
+def nvda_chart():
+    return cedear_chart("NVDA")
 
 
 if __name__ == "__main__":

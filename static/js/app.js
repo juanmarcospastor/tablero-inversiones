@@ -150,10 +150,10 @@ if (bitcoinChartRoot) {
     loadBitcoinChart(currentBtcRange);
 }
 
-const stockChartRoot = document.querySelector("[data-stock-chart]");
-
-if (stockChartRoot) {
-    const stockCanvas = document.getElementById("nvdaRealtimeChart");
+document.querySelectorAll("[data-stock-chart]").forEach((stockChartRoot) => {
+    const stockTicker = stockChartRoot.dataset.stockTicker;
+    const stockName = stockChartRoot.dataset.stockName || stockTicker;
+    const stockCanvas = document.getElementById(`stockRealtimeChart-${stockTicker}`);
     const stockStatus = stockChartRoot.querySelector("[data-stock-status]");
     const stockPrice = stockChartRoot.querySelector("[data-stock-price]");
     const stockUpdated = stockChartRoot.querySelector("[data-stock-updated]");
@@ -201,7 +201,7 @@ if (stockChartRoot) {
         setStockLoading(range);
 
         try {
-            const url = new URL("/api/nvda/chart", window.location.origin);
+            const url = new URL(`/api/cedear/${stockTicker}/chart`, window.location.origin);
             url.searchParams.set("range", range);
 
             const response = await fetch(url);
@@ -238,7 +238,7 @@ if (stockChartRoot) {
                     data: {
                         labels,
                         datasets: [{
-                            label: "NVDA/ARS",
+                            label: `${stockTicker}/ARS`,
                             data: values,
                             borderColor: "#4f46e5",
                             backgroundColor: "rgba(79, 70, 229, 0.12)",
@@ -279,9 +279,9 @@ if (stockChartRoot) {
                 });
             }
 
-            stockStatus.textContent = `NVDA/ARS actualizado desde Yahoo Finance (${stockRangeLabels[range]}).`;
+            stockStatus.textContent = `${stockTicker}/ARS actualizado desde Yahoo Finance (${stockRangeLabels[range]}).`;
         } catch (error) {
-            stockStatus.textContent = `No se pudo cargar NVIDIA CEDEAR realtime: ${error.message}`;
+            stockStatus.textContent = `No se pudo cargar ${stockName} realtime: ${error.message}`;
         } finally {
             setStockReady();
         }
@@ -297,4 +297,4 @@ if (stockChartRoot) {
     });
 
     loadStockChart(currentStockRange);
-}
+});
