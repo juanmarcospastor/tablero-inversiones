@@ -3,13 +3,13 @@ import json
 import urllib.request
 
 from flask import Flask, jsonify, render_template, request
+import pandas as pd
 
 from services.cartera import (
     calcular_cartera_actual,
-    composicion_por_tipo,
     detalle_activo,
-    evolucion_valor_cartera,
-    obtener_resumen,
+    obtener_operaciones,
+    obtener_precios,
 )
 
 app = Flask(__name__)
@@ -18,6 +18,8 @@ CEDEAR_SYMBOLS = {
     "AAPL": "AAPL.BA",
     "NVDA": "NVDA.BA",
 }
+
+HIDDEN_TICKERS = {"BTC"}
 
 
 def _epoch(date_value):
@@ -60,6 +62,84 @@ def _range_to_dates(range_value):
     return datetime(2025, 1, 1), end, "1d"
 
 
+def _filtrar_visibles(cartera):
+    if cartera.empty:
+        return cartera
+    return cartera[~cartera["ticker"].isin(HIDDEN_TICKERS)].copy()
+
+
+def _resumen_desde_cartera(cartera):
+    if cartera.empty:
+        return {
+            "valor_total": 0,
+            "invertido_total": 0,
+            "resultado_total": 0,
+            "rentabilidad_total": 0,
+            "cantidad_activos": 0,
+            "mejor_activo": "-",
+            "peor_activo": "-",
+        }
+
+    valor_total = cartera["valor_actual"].sum()
+    invertido_total = cartera["monto_invertido"].sum()
+    resultado_total = valor_total - invertido_total
+    rentabilidad_total = (resultado_total / invertido_total * 100) if invertido_total else 0
+    mejor = cartera.sort_values("rentabilidad_total", ascending=False).iloc[0]
+    peor = cartera.sort_values("rentabilidad_total", ascending=True).iloc[0]
+
+    return {
+        "valor_total": valor_total,
+        "invertido_total": invertido_total,
+        "resultado_total": resultado_total,
+        "rentabilidad_total": rentabilidad_total,
+        "cantidad_activos": len(cartera),
+        "mejor_activo": mejor["ticker"],
+        "peor_activo": peor["ticker"],
+    }
+
+
+def _composicion_desde_cartera(cartera):
+    if cartera.empty:
+        return []
+    return cartera.groupby("tipo_activo", as_index=False).agg(valor=("valor_actual", "sum")).to_dict(orient="records")
+
+
+def _evolucion_visible(tickers_visibles):
+    operaciones = obtener_operaciones()
+    precios = obtener_precios()
+    if operaciones.empty or precios.empty or not tickers_visibles:
+        return []
+
+    operaciones = operaciones[operaciones["ticker"].isin(tickers_visibles)].copy()
+    precios = precios[precios["ticker"].isin(tickers_visibles)].copy()
+    if operaciones.empty or precios.empty:
+        return []
+
+    operaciones["fecha_operacion"] = pd.to_datetime(operaciones["fecha_operacion"])
+    precios["fecha"] = pd.to_datetime(precios["fecha"])
+    fechas = sorted(precios["fecha"].unique())
+
+    serie = []
+    for fecha in fechas:
+        ops_hasta_fecha = operaciones[operaciones["fecha_operacion"] <= fecha].copy()
+        if ops_hasta_fecha.empty:
+            continue
+        ops_hasta_fecha["cantidad_ajustada"] = ops_hasta_fecha.apply(
+            lambda r: r["cantidad"] if r["operacion"].upper() in ["COMPRA", "SUSCRIPCION"] else -r["cantidad"],
+            axis=1,
+        )
+        tenencias = ops_hasta_fecha.groupby("ticker", as_index=False).agg(cantidad=("cantidad_ajustada", "sum"))
+        valor_total = 0
+        for _, row in tenencias.iterrows():
+            precios_hasta_fecha = precios[
+                (precios["ticker"] == row["ticker"]) & (precios["fecha"] <= fecha)
+            ].sort_values("fecha")
+            if not precios_hasta_fecha.empty:
+                valor_total += row["cantidad"] * float(precios_hasta_fecha.iloc[-1]["precio"])
+        serie.append({"fecha": pd.to_datetime(fecha).strftime("%Y-%m-%d"), "valor": round(valor_total, 2)})
+    return serie
+
+
 @app.template_filter("money")
 def money(value):
     try:
@@ -78,10 +158,11 @@ def pct(value):
 
 @app.route("/")
 def index():
-    cartera = calcular_cartera_actual()
-    resumen = obtener_resumen()
-    evolucion = evolucion_valor_cartera()
-    composicion = composicion_por_tipo()
+    cartera = _filtrar_visibles(calcular_cartera_actual())
+    tickers_visibles = set(cartera["ticker"].tolist()) if not cartera.empty else set()
+    resumen = _resumen_desde_cartera(cartera)
+    evolucion = _evolucion_visible(tickers_visibles)
+    composicion = _composicion_desde_cartera(cartera)
     return render_template(
         "index.html",
         cartera=cartera.to_dict(orient="records"),
