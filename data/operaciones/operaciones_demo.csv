@@ -1,3 +1,3 @@
 fecha_operacion,ticker,nombre,tipo_activo,operacion,cantidad,precio_unitario,monto_total,moneda,comisiones,fuente
 2025-01-15,BTC,Bitcoin,Cripto,COMPRA,0.006,100000000,600000,ARS,0,Bitcoin
-2025-01-22,NVDA,NVIDIA Corp,Accion,COMPRA,13,7377.84,95911.92,ARS,0,Compra real
+2025-01-22,NVDA,NVIDIA CEDEAR,CEDEAR,COMPRA,13,7377.84,95911.92,ARS,0,Compra real

@@ -281,7 +281,7 @@ if (stockChartRoot) {
 
             stockStatus.textContent = `NVDA/ARS actualizado desde Yahoo Finance (${stockRangeLabels[range]}).`;
         } catch (error) {
-            stockStatus.textContent = `No se pudo cargar NVIDIA realtime: ${error.message}`;
+            stockStatus.textContent = `No se pudo cargar NVIDIA CEDEAR realtime: ${error.message}`;
         } finally {
             setStockReady();
         }

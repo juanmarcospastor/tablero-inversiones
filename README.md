@@ -5,14 +5,14 @@ Dashboard local en Flask para seguir una cartera de inversiones en pesos argenti
 Actualmente incluye:
 
 - Bitcoin (`BTC`)
-- NVIDIA Corp (`NVDA`)
+- NVIDIA CEDEAR (`NVDA`, cotizacion Yahoo Finance `NVDA.BA`)
 - Resumen general de cartera
 - Cards por activo
 - Tabla de posiciones
 - Grafico de evolucion de cartera
 - Grafico de composicion por tipo de activo
 - Grafico realtime de Bitcoin via CoinGecko
-- Grafico realtime de NVIDIA via Yahoo Finance convertido a ARS
+- Grafico realtime de NVIDIA CEDEAR via Yahoo Finance (`NVDA.BA`)
 
 ## Ejecutar localmente
 

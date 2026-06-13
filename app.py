@@ -44,24 +44,6 @@ def _fetch_yahoo_chart(symbol, start, end, interval="1d"):
     return points
 
 
-def _latest_fx_rate(end):
-    start = end - timedelta(days=14)
-    fx_points = _fetch_yahoo_chart("ARS=X", start, end, "1d")
-    if not fx_points:
-        raise ValueError("No se pudo obtener USD/ARS")
-    return fx_points[-1]["price"]
-
-
-def _daily_fx_by_date(start, end):
-    fx_points = _fetch_yahoo_chart("ARS=X", start - timedelta(days=10), end, "1d")
-    rates = {}
-    latest = None
-    for point in fx_points:
-        latest = point["price"]
-        rates[point["date"].strftime("%Y-%m-%d")] = latest
-    return rates, latest
-
-
 def _range_to_dates(range_value):
     end = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
     if range_value == "1":
@@ -118,31 +100,19 @@ def nvda_chart():
 
     try:
         start, end, interval = _range_to_dates(range_value)
-        nvda_points = _fetch_yahoo_chart("NVDA", start, end, interval)
+        nvda_points = _fetch_yahoo_chart("NVDA.BA", start, end, interval)
         if not nvda_points:
-            return jsonify({"error": "Yahoo Finance no devolvio precios de NVDA"}), 502
+            return jsonify({"error": "Yahoo Finance no devolvio precios de NVDA.BA"}), 502
 
-        prices = []
-        if interval == "5m":
-            fx_rate = _latest_fx_rate(end)
-            prices = [
-                [int(point["date"].timestamp() * 1000), round(point["price"] * fx_rate, 2)]
-                for point in nvda_points
-            ]
-        else:
-            fx_by_date, fallback_fx = _daily_fx_by_date(start, end)
-            last_fx = fallback_fx
-            for point in nvda_points:
-                date_key = point["date"].strftime("%Y-%m-%d")
-                last_fx = fx_by_date.get(date_key, last_fx)
-                if last_fx is None:
-                    continue
-                prices.append([int(point["date"].timestamp() * 1000), round(point["price"] * last_fx, 2)])
+        prices = [
+            [int(point["date"].timestamp() * 1000), round(point["price"], 2)]
+            for point in nvda_points
+        ]
 
         if not prices:
-            return jsonify({"error": "No se pudo convertir NVDA a ARS"}), 502
+            return jsonify({"error": "No se pudo obtener NVDA.BA en ARS"}), 502
 
-        return jsonify({"ticker": "NVDA", "currency": "ARS", "prices": prices})
+        return jsonify({"ticker": "NVDA.BA", "currency": "ARS", "prices": prices})
     except Exception as exc:
         return jsonify({"error": str(exc)}), 502
 
