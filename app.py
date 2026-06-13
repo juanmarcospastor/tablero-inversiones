@@ -63,6 +63,61 @@ def _range_to_dates(range_value):
     return datetime(2025, 1, 1), end, "1d"
 
 
+def _latest_cedear_prices(tickers):
+    end = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
+    start = end - timedelta(days=10)
+    latest_prices = {}
+
+    for ticker in tickers:
+        yahoo_symbol = CEDEAR_SYMBOLS.get(ticker)
+        if yahoo_symbol is None:
+            continue
+
+        try:
+            points = _fetch_yahoo_chart(yahoo_symbol, start, end, "1d")
+        except Exception:
+            continue
+
+        if not points:
+            continue
+
+        latest = points[-1]
+        latest_prices[ticker] = {
+            "fecha": latest["date"].strftime("%Y-%m-%d"),
+            "precio": round(latest["price"], 2),
+        }
+
+    return latest_prices
+
+
+def _aplicar_precios_actuales(cartera):
+    if cartera.empty:
+        return cartera
+
+    cartera = cartera.copy()
+    latest_prices = _latest_cedear_prices(cartera["ticker"].tolist())
+    if not latest_prices:
+        return cartera
+
+    for index, row in cartera.iterrows():
+        latest = latest_prices.get(row["ticker"])
+        if latest is None:
+            continue
+
+        precio_actual = latest["precio"]
+        monto_invertido = row["monto_invertido"]
+        valor_actual = row["cantidad_actual"] * precio_actual
+        resultado_pesos = valor_actual - monto_invertido
+
+        cartera.at[index, "precio_actual"] = precio_actual
+        cartera.at[index, "fecha_precio"] = latest["fecha"]
+        cartera.at[index, "valor_actual"] = valor_actual
+        cartera.at[index, "resultado_pesos"] = resultado_pesos
+        cartera.at[index, "rentabilidad_total"] = (resultado_pesos / monto_invertido * 100) if monto_invertido else 0
+
+    return cartera.sort_values("valor_actual", ascending=False)
+
+
 def _filtrar_visibles(cartera):
     if cartera.empty:
         return cartera
@@ -159,7 +214,7 @@ def pct(value):
 
 @app.route("/")
 def index():
-    cartera = _filtrar_visibles(calcular_cartera_actual())
+    cartera = _aplicar_precios_actuales(_filtrar_visibles(calcular_cartera_actual()))
     tickers_visibles = set(cartera["ticker"].tolist()) if not cartera.empty else set()
     resumen = _resumen_desde_cartera(cartera)
     evolucion = _evolucion_visible(tickers_visibles)
